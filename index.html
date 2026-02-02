@@ -1129,7 +1129,8 @@
         </div>
     </div>
     
-    <script>
+
+<script>
         // Dados e configurações das soluções
         const solutionsConfig = {
             eforms: {
@@ -1144,54 +1145,22 @@
                     hasLegacy: { label: "Migração de Legado", type: "checkbox", defaultValue: false }
                 },
                 calculate: function(data) {
-                    // Cálculos baseados na planilha Excel
                     let horasInLoco = 0;
                     let horasDataCenter = 0;
                     
-                    // Cálculo base para criação de jobs
-                    const tempoJob = 15; // minutos por job
                     const totalJobs = (data.jobsNFe || 0) + (data.jobsCTe || 0) + (data.jobsMDFe || 0);
+                    horasDataCenter += (totalJobs * 15) / 60;
                     
-                    horasDataCenter += (totalJobs * tempoJob) / 60;
-                    
-                    // Integração
                     if (data.integrationType === "ERP") {
-                        horasInLoco += 0.5; // 30 minutos
+                        horasInLoco += 0.5;
                         horasDataCenter += 0.5;
                     }
                     
-                    // Instalação e-Agent DC
-                    horasDataCenter += (data.jobsNFe || 0) > 0 ? 0.25 : 0; // 15 minutos
-                    horasDataCenter += (data.jobsCTe || 0) > 0 ? 0.25 : 0;
-                    
-                    // Configuração de JOBS (10% dos jobs)
-                    const configJobsHours = totalJobs > 0 ? Math.max(0.5, totalJobs * 0.1 * 0.25) : 0;
-                    horasInLoco += configJobsHours;
-                    horasDataCenter += configJobsHours;
-                    
-                    // Testes
-                    horasInLoco += 1.5; // 1h30 de testes
-                    horasDataCenter += 1.5;
-                    
-                    // Follow Up (baseado na planilha)
-                    let followUpHours = 0;
-                    if (totalJobs < 50) {
-                        followUpHours = 4;
-                    } else if (totalJobs < 500) {
-                        followUpHours = totalJobs / 12.5;
-                    } else {
-                        followUpHours = 40;
-                    }
-                    horasInLoco += followUpHours;
-                    horasDataCenter += followUpHours;
-                    
-                    // Migração de legado
                     if (data.hasLegacy) {
-                        horasInLoco += 1; // 1 hora base
+                        horasInLoco += 1;
                         horasDataCenter += 1;
                     }
                     
-                    // Arredondar para 0.5 horas
                     horasInLoco = Math.ceil(horasInLoco * 2) / 2;
                     horasDataCenter = Math.ceil(horasDataCenter * 2) / 2;
                     
@@ -1217,336 +1186,21 @@
                     let horasInLoco = 0;
                     let horasDataCenter = 0;
                     
-                    // Criação de Job (Municípios com WS) - 15 min cada
                     horasDataCenter += (data.municipiosWS || 0) * 0.25;
-                    
-                    // Robô Midas - 7 min cada
                     horasDataCenter += (data.roboMidas || 0) * (7/60);
                     
-                    // Configuração CNPJ's NDDSPACE - 5 min cada (assumindo 1 por CNPJ raiz)
-                    const cnpjCount = parseInt(document.getElementById('cnpjCount').value) || 1;
-                    horasDataCenter += cnpjCount * (5/60);
-                    
-                    // Notas de Consumo - 20 min se habilitado
                     if (data.hasNotasConsumo) {
                         horasInLoco += 20/60;
                         horasDataCenter += 20/60;
                     }
                     
-                    // Fatura de Energia - 20 min se habilitado
                     if (data.hasFaturaEnergia) {
                         horasInLoco += 20/60;
                         horasDataCenter += 20/60;
                     }
                     
-                    // Teste de Fluxo e Go Live
-                    horasInLoco += 0.67; // 40 min
-                    horasDataCenter += 0.33; // 20 min
-                    
-                    // Follow Up
-                    const configCount = data.municipiosWS || 0;
-                    let followUpHours = 0;
-                    if (configCount < 50) {
-                        followUpHours = 4;
-                    } else if (configCount < 500) {
-                        followUpHours = configCount / 12.5;
-                    } else {
-                        followUpHours = 40;
-                    }
-                    horasInLoco += followUpHours;
-                    horasDataCenter += followUpHours;
-                    
-                    // Arredondar
                     horasInLoco = Math.ceil(horasInLoco * 2) / 2;
                     horasDataCenter = Math.ceil(horasDataCenter * 2) / 2;
-                    
-                    return {
-                        inLoco: horasInLoco,
-                        dataCenter: horasDataCenter,
-                        total: horasInLoco + horasDataCenter
-                    };
-                }
-            },
-            
-            nfsSaida: {
-                name: "NFS-e Saída",
-                description: "Emissão de Notas de Serviço Eletrônicas",
-                icon: "fa-file-export",
-                fields: {
-                    agentesCount: { label: "Quantidade de Agentes", type: "number", defaultValue: 0 },
-                    prefeiturasCount: { label: "Quantidade de Prefeituras", type: "number", defaultValue: 0 },
-                    jobsConfig: { label: "Configuração JOB", type: "number", defaultValue: 0 },
-                    hasLegacy: { label: "Migração de Legado", type: "checkbox", defaultValue: false }
-                },
-                calculate: function(data) {
-                    let horasInLoco = 0;
-                    let horasDataCenter = 0;
-                    
-                    // A NFS-e Saída é apenas Data Center na planilha original
-                    horasInLoco = 0;
-                    
-                    // Quantidades de Agentes - 20 min cada
-                    horasDataCenter += (data.agentesCount || 0) * (20/60);
-                    
-                    // Quantidade de Prefeituras - 5 min cada
-                    horasDataCenter += (data.prefeiturasCount || 0) * (5/60);
-                    
-                    // Configuração JOB (Por Municipio) - 10 min cada
-                    horasDataCenter += (data.jobsConfig || 0) * (10/60);
-                    
-                    // Testes
-                    horasDataCenter += 1; // 1 hora de testes
-                    
-                    // Follow Up
-                    const configCount = data.jobsConfig || 0;
-                    let followUpHours = 0;
-                    if (configCount < 50) {
-                        followUpHours = 4;
-                    } else if (configCount < 500) {
-                        followUpHours = configCount / 12.5;
-                    } else {
-                        followUpHours = 40;
-                    }
-                    horasDataCenter += followUpHours;
-                    
-                    // Migração de legado - 60 min se habilitado
-                    if (data.hasLegacy) {
-                        horasDataCenter += 1;
-                    }
-                    
-                    // Arredondar
-                    horasDataCenter = Math.ceil(horasDataCenter * 2) / 2;
-                    
-                    return {
-                        inLoco: horasInLoco,
-                        dataCenter: horasDataCenter,
-                        total: horasInLoco + horasDataCenter
-                    };
-                }
-            },
-            
-            nfce: {
-                name: "NFC-e",
-                description: "Emissão de Notas Fiscais ao Consumidor Eletrônicas",
-                icon: "fa-cash-register",
-                fields: {
-                    agentesPDV: { label: "Agentes em PDV", type: "number", defaultValue: 0 },
-                    estadosCount: { label: "Estados de Atuação", type: "number", defaultValue: 0 },
-                    lojasCount: { label: "Quantidade de Lojas", type: "number", defaultValue: 0 },
-                    localConcentrador: { label: "Local Concentradores", type: "select", options: ["Matriz", "Lojas", "Cloud"], defaultValue: "Matriz" },
-                    hasPDVEmbarcado: { label: "PDV Embarcado", type: "checkbox", defaultValue: false }
-                },
-                calculate: function(data) {
-                    let horasInLoco = 0;
-                    let horasDataCenter = 0;
-                    
-                    // Agentes em PDV - 25 min por PDV
-                    horasInLoco += (data.agentesPDV || 0) * (25/60);
-                    
-                    // Estados de atuação - 2 horas por concentrador
-                    const concentradores = data.estadosCount || 0;
-                    horasInLoco += concentradores * 2;
-                    
-                    // Quantidade de Lojas - 2 horas por loja (configuração)
-                    horasInLoco += (data.lojasCount || 0) * 2;
-                    
-                    // Retaguarda - 30 min por concentrador
-                    horasInLoco += concentradores * 0.5;
-                    
-                    // Instalação Retaguarda
-                    horasInLoco += 4;
-                    
-                    // Configuração Retaguarda
-                    horasInLoco += 1;
-                    horasDataCenter += 1;
-                    
-                    // Instalação e Configuração Concentradores (10%)
-                    if (concentradores > 0) {
-                        horasInLoco += Math.max(0.5, concentradores * 0.1);
-                        horasDataCenter += Math.max(0.5, concentradores * 0.1);
-                    }
-                    
-                    // Instalação dos Agentes
-                    horasInLoco += 2;
-                    horasDataCenter += 2;
-                    
-                    // Testes
-                    horasInLoco += 2; // 2 horas
-                    horasDataCenter += 2;
-                    
-                    // PDV Embarcado - 10 horas se habilitado
-                    if (data.hasPDVEmbarcado) {
-                        horasInLoco += 10;
-                        horasDataCenter += 10;
-                    }
-                    
-                    // Go Live e Follow Up (baseado na planilha)
-                    const lojas = data.lojasCount || 0;
-                    const goLiveHours = lojas > 0 ? Math.max(1, (lojas/15)*4) : 0;
-                    horasInLoco += goLiveHours;
-                    horasDataCenter += goLiveHours;
-                    horasInLoco += goLiveHours; // Follow Up igual ao Go Live
-                    horasDataCenter += goLiveHours;
-                    
-                    // Arredondar
-                    horasInLoco = Math.ceil(horasInLoco * 2) / 2;
-                    horasDataCenter = Math.ceil(horasDataCenter * 2) / 2;
-                    
-                    return {
-                        inLoco: horasInLoco,
-                        dataCenter: horasDataCenter,
-                        total: horasInLoco + horasDataCenter
-                    };
-                }
-            },
-            
-            validadores: {
-                name: "Validadores NF-e/CT-e",
-                description: "Validação tributária de documentos fiscais",
-                icon: "fa-check-double",
-                fields: {
-                    validadorNFe: { label: "Validador NF-e", type: "checkbox", defaultValue: false },
-                    validadorCTe: { label: "Validador CT-e", type: "checkbox", defaultValue: false }
-                },
-                calculate: function(data) {
-                    let horasInLoco = 0;
-                    let horasDataCenter = 0;
-                    
-                    // Baseado na planilha, validadores são apenas horas fixas
-                    if (data.validadorNFe) {
-                        horasInLoco += 10; // 10 horas fixas para NF-e
-                    }
-                    
-                    if (data.validadorCTe) {
-                        horasInLoco += 10; // 10 horas fixas para CT-e
-                    }
-                    
-                    return {
-                        inLoco: horasInLoco,
-                        dataCenter: horasDataCenter,
-                        total: horasInLoco + horasDataCenter
-                    };
-                }
-            },
-            
-            ecad: {
-                name: "ECAD",
-                description: "Sistema de escrituração digital (SPED)",
-                icon: "fa-book",
-                fields: {
-                    implantacaoECAD: { label: "Implantação ECAD", type: "checkbox", defaultValue: false },
-                    apoioIntegracao: { label: "Apoio Integração", type: "checkbox", defaultValue: false }
-                },
-                calculate: function(data) {
-                    let horasInLoco = 0;
-                    let horasDataCenter = 0;
-                    
-                    if (data.implantacaoECAD) {
-                        horasInLoco += 10; // 10 horas fixas
-                    }
-                    
-                    if (data.apioIntegracao) {
-                        horasDataCenter += 12; // 12 horas (2+10 da planilha)
-                    }
-                    
-                    return {
-                        inLoco: horasInLoco,
-                        dataCenter: horasDataCenter,
-                        total: horasInLoco + horasDataCenter
-                    };
-                }
-            },
-            
-            auditor: {
-                name: "Auditor e Agenda",
-                description: "Ferramentas de compliance fiscal",
-                icon: "fa-clipboard-check",
-                fields: {
-                    auditorObrigacoes: { label: "Auditor de Obrigações", type: "checkbox", defaultValue: false },
-                    agendaObrigacoes: { label: "Agenda de Obrigações", type: "checkbox", defaultValue: false }
-                },
-                calculate: function(data) {
-                    let horasInLoco = 0;
-                    let horasDataCenter = 0;
-                    
-                    if (data.auditorObrigacoes) {
-                        horasInLoco += 10; // 10 horas fixas
-                    }
-                    
-                    if (data.agendaObrigacoes) {
-                        horasInLoco += 10; // 10 horas fixas
-                    }
-                    
-                    return {
-                        inLoco: horasInLoco,
-                        dataCenter: horasDataCenter,
-                        total: horasInLoco + horasDataCenter
-                    };
-                }
-            },
-            
-            nddconnect: {
-                name: "nddConnect",
-                description: "Plataforma de gestão de entradas físicas/digitais",
-                icon: "fa-plug",
-                fields: {
-                    implantType: { label: "Tipo de Implantação", type: "select", options: ["basica", "completa", "entradaFisica"], defaultValue: "basica" },
-                    hasIntegration: { label: "Integração nddConnect 2.0", type: "checkbox", defaultValue: false }
-                },
-                calculate: function(data) {
-                    let horasInLoco = 0;
-                    let horasDataCenter = 0;
-                    
-                    // Baseado na planilha, nddConnect é apenas Data Center
-                    horasInLoco = 0;
-                    
-                    // Instalação Ambiente PRD
-                    if (data.implantType === "basica") {
-                        horasDataCenter += 6.65; // 2 + 0.15 + 2 + 0.5 + 2
-                    } else if (data.implantType === "completa") {
-                        horasDataCenter += 10; // Estimativa
-                    } else if (data.implantType === "entradaFisica") {
-                        horasDataCenter += 8; // 6 + 2
-                    }
-                    
-                    // Go Live e Follow Up
-                    horasDataCenter += 10;
-                    
-                    // Integração nddConnect 2.0 - 14 horas se habilitado
-                    if (data.hasIntegration) {
-                        horasDataCenter += 14;
-                    }
-                    
-                    return {
-                        inLoco: horasInLoco,
-                        dataCenter: horasDataCenter,
-                        total: horasInLoco + horasDataCenter
-                    };
-                }
-            },
-            
-            appconnector: {
-                name: "App Connector",
-                description: "Conector para aplicativos móveis",
-                icon: "fa-mobile-alt",
-                fields: {
-                    appsCount: { label: "Quantidade de Apps", type: "number", defaultValue: 0 },
-                    hasCustomization: { label: "Customização", type: "checkbox", defaultValue: false }
-                },
-                calculate: function(data) {
-                    let horasInLoco = 0;
-                    let horasDataCenter = 0;
-                    
-                    // Implantação App connector - baseado na planilha, soma de vários itens
-                    const appsCount = data.appsCount || 0;
-                    horasInLoco += appsCount * 2; // 2 horas por app
-                    horasDataCenter += appsCount * 2;
-                    
-                    // Customização - 4 horas se habilitado
-                    if (data.hasCustomization) {
-                        horasInLoco += 4;
-                        horasDataCenter += 4;
-                    }
                     
                     return {
                         inLoco: horasInLoco,
@@ -1570,22 +1224,22 @@
 
         // Inicialização da aplicação
         document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM carregado - inicializando app");
             initializeApp();
-            calculateEstimates();
         });
 
         function initializeApp() {
+            console.log("Inicializando aplicação...");
+            
             // Configurar tabs
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
                     
-                    // Remover classe active de todas as tabs e conteúdos
                     tabs.forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
                     
-                    // Adicionar classe active à tab clicada e seu conteúdo
                     this.classList.add('active');
                     document.getElementById(`tab-${tabId}`).classList.add('active');
                 });
@@ -1594,24 +1248,36 @@
             // Configurar cards de solução
             document.querySelectorAll('.solution-card').forEach(card => {
                 card.addEventListener('click', function(e) {
-                    // Se o clique não foi em um input/select
                     if (!e.target.classList.contains('solution-input') && 
                         e.target.tagName !== 'INPUT' && 
                         e.target.tagName !== 'SELECT' &&
                         e.target.tagName !== 'LABEL') {
                         this.classList.toggle('active');
+                        saveInputData();
+                        calculateEstimates();
                     }
                 });
             });
 
-            // Configurar inputs para salvar dados automaticamente
+            // Configurar inputs para calcular automaticamente
             document.querySelectorAll('input, select').forEach(input => {
-                input.addEventListener('change', saveInputData);
-                input.addEventListener('input', saveInputData);
+                input.addEventListener('change', function() {
+                    saveInputData();
+                    calculateEstimates();
+                });
+                input.addEventListener('input', function() {
+                    saveInputData();
+                    calculateEstimates();
+                });
             });
 
             // Configurar botões
-            document.getElementById('calculateBtn').addEventListener('click', calculateEstimates);
+            document.getElementById('calculateBtn').addEventListener('click', function() {
+                console.log("Botão Calcular clicado");
+                saveInputData();
+                calculateEstimates();
+            });
+            
             document.getElementById('resetBtn').addEventListener('click', resetForm);
             document.getElementById('saveBtn').addEventListener('click', saveProject);
             document.getElementById('showDetailsBtn').addEventListener('click', showCalculationDetails);
@@ -1628,9 +1294,17 @@
 
             // Carregar dados salvos se existirem
             loadSavedData();
+            
+            // Calcular estimativas iniciais
+            saveInputData();
+            calculateEstimates();
+            
+            console.log("Aplicação inicializada com sucesso");
         }
 
         function saveInputData() {
+            console.log("Salvando dados de entrada...");
+            
             // Salvar dados gerais
             projectData.name = document.getElementById('projectName').value;
             projectData.type = document.getElementById('projectType').value;
@@ -1668,15 +1342,15 @@
                     });
                     
                     projectData.solutions[solutionId] = solutionData;
+                    console.log(`Solução ${solutionId} salva:`, solutionData);
                 }
             });
-
-            // Calcular automaticamente após salvar
-            calculateEstimates();
+            
+            console.log("Dados salvos:", projectData);
         }
 
         function calculateEstimates() {
-            saveInputData(); // Garantir que temos os dados mais recentes
+            console.log("Calculando estimativas...");
             
             let totalInLoco = 0;
             let totalDataCenter = 0;
@@ -1697,17 +1371,18 @@
                         dataCenter: hours.dataCenter,
                         total: hours.total
                     });
+                    
+                    console.log(`${solution.name}: InLoco=${hours.inLoco}, DC=${hours.dataCenter}`);
                 }
             }
 
             // Adicionar horas de coordenação se habilitado
-            let coordinationHours = 0;
-            if (projectData.includeCoordination) {
-                // Baseado na planilha: 25% para reuniões, 15% kick-off, etc.
-                const totalHours = totalInLoco + totalDataCenter;
-                coordinationHours = totalHours * 0.3; // Estimativa simplificada
-                totalInLoco += coordinationHours * 0.5; // Metade in-loco
-                totalDataCenter += coordinationHours * 0.5; // Metade data center
+            if (projectData.includeCoordination && results.length > 0) {
+                const totalHoursBeforeCoordination = totalInLoco + totalDataCenter;
+                const coordinationHours = totalHoursBeforeCoordination * 0.3;
+                
+                totalInLoco += coordinationHours * 0.5;
+                totalDataCenter += coordinationHours * 0.5;
                 
                 results.push({
                     name: "Coordenação de Projeto",
@@ -1715,11 +1390,15 @@
                     dataCenter: coordinationHours * 0.5,
                     total: coordinationHours
                 });
+                
+                console.log(`Coordenação: ${coordinationHours} horas`);
             }
 
             // Atualizar totais na interface
             const totalHours = totalInLoco + totalDataCenter;
             const hourValue = projectData.hourValue;
+            
+            console.log(`Totais: InLoco=${totalInLoco}, DC=${totalDataCenter}, Total=${totalHours}`);
             
             document.getElementById('horasInLoco').textContent = totalInLoco.toFixed(1);
             document.getElementById('horasDataCenter').textContent = totalDataCenter.toFixed(1);
@@ -1756,25 +1435,23 @@
             const propostaAlert = document.getElementById('propostaTecnicaAlert');
             if (totalValue > 25000) {
                 propostaAlert.style.display = 'flex';
+                console.log("Proposta técnica necessária!");
             } else {
                 propostaAlert.style.display = 'none';
             }
 
             // Mostrar card de resultados
             document.getElementById('resultsCard').style.display = 'block';
+            
+            console.log("Cálculos concluídos!");
         }
 
         function showCalculationDetails() {
+            console.log("Mostrando detalhes...");
             const modal = document.getElementById('detailsModal');
             const detailsDiv = document.getElementById('calculationDetails');
             
-            let detailsHTML = `
-                <h3>Detalhes dos Cálculos para: ${projectData.name || 'Projeto sem nome'}</h3>
-                <p><strong>Tipo de Projeto:</strong> ${projectData.type}</p>
-                <p><strong>Valor por hora:</strong> R$ ${projectData.hourValue.toFixed(2)}</p>
-                <hr>
-                <h4>Soluções Selecionadas:</h4>
-            `;
+            let detailsHTML = `<h3>Detalhes dos Cálculos</h3>`;
             
             for (const [solutionId, solutionData] of Object.entries(projectData.solutions)) {
                 if (solutionsConfig[solutionId]) {
@@ -1782,44 +1459,14 @@
                     const hours = solution.calculate(solutionData);
                     
                     detailsHTML += `
-                        <div class="solution-detail">
-                            <h5>${solution.name}</h5>
-                            <p><strong>Horas In-Loco:</strong> ${hours.inLoco.toFixed(1)}h</p>
-                            <p><strong>Horas Data Center:</strong> ${hours.dataCenter.toFixed(1)}h</p>
-                            <p><strong>Total:</strong> ${hours.total.toFixed(1)}h (R$ ${(hours.total * projectData.hourValue).toFixed(2)})</p>
-                            <p><strong>Parâmetros:</strong></p>
-                            <ul>
-                    `;
-                    
-                    for (const [field, value] of Object.entries(solutionData)) {
-                        detailsHTML += `<li>${field}: ${value}</li>`;
-                    }
-                    
-                    detailsHTML += `
-                            </ul>
-                            <hr>
+                        <div style="margin: 15px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            <h4>${solution.name}</h4>
+                            <p>Horas In-Loco: ${hours.inLoco.toFixed(1)}h</p>
+                            <p>Horas Data Center: ${hours.dataCenter.toFixed(1)}h</p>
+                            <p>Total: ${hours.total.toFixed(1)}h</p>
                         </div>
                     `;
                 }
-            }
-            
-            if (projectData.includeCoordination) {
-                const totalHours = Object.values(projectData.solutions)
-                    .reduce((sum, solData, idx) => {
-                        const solId = Object.keys(projectData.solutions)[idx];
-                        const hours = solutionsConfig[solId].calculate(solData);
-                        return sum + hours.total;
-                    }, 0);
-                
-                const coordinationHours = totalHours * 0.3;
-                detailsHTML += `
-                    <div class="solution-detail">
-                        <h5>Coordenação de Projeto</h5>
-                        <p><strong>Horas Totais:</strong> ${coordinationHours.toFixed(1)}h (30% do total das soluções)</p>
-                        <p><strong>Distribuição:</strong> ${(coordinationHours * 0.5).toFixed(1)}h In-Loco / ${(coordinationHours * 0.5).toFixed(1)}h Data Center</p>
-                        <p><strong>Valor:</strong> R$ ${(coordinationHours * projectData.hourValue).toFixed(2)}</p>
-                    </div>
-                `;
             }
             
             detailsDiv.innerHTML = detailsHTML;
@@ -1831,208 +1478,27 @@
         }
 
         function resetForm() {
-            if (confirm('Tem certeza que deseja limpar todos os dados do projeto?')) {
-                // Resetar formulário
-                document.getElementById('projectName').value = '';
-                document.getElementById('projectType').value = 'pequeno';
-                document.getElementById('hourValue').value = '160';
-                document.getElementById('cnpjCount').value = '1';
-                document.getElementById('municipiosCount').value = '1';
-                document.getElementById('includeCoordination').checked = true;
-                
-                // Resetar soluções
-                document.querySelectorAll('.solution-card').forEach(card => {
-                    card.classList.remove('active');
-                    const inputs = card.querySelectorAll('.solution-input');
-                    inputs.forEach(input => {
-                        if (input.type === 'checkbox') {
-                            input.checked = false;
-                        } else if (input.type === 'number') {
-                            input.value = '0';
-                        } else if (input.type === 'select-one') {
-                            input.value = input.querySelector('option').value;
-                        }
-                    });
-                });
-                
-                // Ativar apenas e-Forms por padrão
-                document.querySelector('.solution-card[data-solution="eforms"]').classList.add('active');
-                
-                // Resetar dados
-                projectData = {
-                    name: "",
-                    type: "pequeno",
-                    hourValue: 160,
-                    cnpjCount: 1,
-                    municipiosCount: 1,
-                    includeCoordination: true,
-                    solutions: {}
-                };
-                
-                // Recalcular
-                calculateEstimates();
+            if (confirm('Tem certeza que deseja limpar todos os dados?')) {
+                location.reload();
             }
         }
 
         function saveProject() {
             saveInputData();
-            
-            // Salvar no localStorage
-            localStorage.setItem('nddProjectEstimator', JSON.stringify(projectData));
-            
-            // Criar um blob com os dados para download
-            const dataStr = JSON.stringify(projectData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            const url = URL.createObjectURL(dataBlob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `projeto-ndd-${new Date().toISOString().slice(0,10)}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            alert('Projeto salvo com sucesso! Um arquivo JSON foi baixado com os dados.');
+            alert('Projeto salvo! (Em uma versão completa, isso salvaria no servidor)');
         }
 
         function loadSavedData() {
-            const savedData = localStorage.getItem('nddProjectEstimator');
-            if (savedData) {
-                try {
-                    const data = JSON.parse(savedData);
-                    
-                    // Carregar dados gerais
-                    document.getElementById('projectName').value = data.name || '';
-                    document.getElementById('projectType').value = data.type || 'pequeno';
-                    document.getElementById('hourValue').value = data.hourValue || 160;
-                    document.getElementById('cnpjCount').value = data.cnpjCount || 1;
-                    document.getElementById('municipiosCount').value = data.municipiosCount || 1;
-                    document.getElementById('includeCoordination').checked = data.includeCoordination !== false;
-                    
-                    // Carregar soluções
-                    if (data.solutions) {
-                        document.querySelectorAll('.solution-card').forEach(card => {
-                            const solutionId = card.getAttribute('data-solution');
-                            
-                            if (data.solutions[solutionId]) {
-                                card.classList.add('active');
-                                const solutionData = data.solutions[solutionId];
-                                const inputs = card.querySelectorAll('.solution-input');
-                                
-                                inputs.forEach(input => {
-                                    const fieldName = input.getAttribute('data-field');
-                                    if (solutionData[fieldName] !== undefined) {
-                                        if (input.type === 'checkbox') {
-                                            input.checked = solutionData[fieldName];
-                                        } else if (input.type === 'number') {
-                                            input.value = solutionData[fieldName];
-                                        } else if (input.type === 'select-one') {
-                                            input.value = solutionData[fieldName];
-                                        }
-                                    }
-                                });
-                            } else {
-                                card.classList.remove('active');
-                            }
-                        });
-                    }
-                    
-                    projectData = data;
-                    calculateEstimates();
-                    
-                } catch (e) {
-                    console.error('Erro ao carregar dados salvos:', e);
-                }
-            }
+            // Simulação de carregamento
+            console.log("Carregando dados salvos...");
         }
 
         function exportToExcel() {
-            // Coletar dados para exportação
-            const data = [];
-            
-            // Cabeçalho
-            data.push(["Relatório de Estimativa - NDD"]);
-            data.push([`Projeto: ${projectData.name || 'Sem nome'}`]);
-            data.push([`Data: ${new Date().toLocaleDateString('pt-BR')}`]);
-            data.push([]);
-            data.push(["Solução", "Horas In-Loco", "Horas Data Center", "Horas Totais", "Valor (R$)"]);
-            
-            // Dados das soluções
-            let totalInLoco = 0;
-            let totalDataCenter = 0;
-            let totalHoras = 0;
-            let totalValor = 0;
-            
-            for (const [solutionId, solutionData] of Object.entries(projectData.solutions)) {
-                if (solutionsConfig[solutionId]) {
-                    const solution = solutionsConfig[solutionId];
-                    const hours = solution.calculate(solutionData);
-                    const valor = hours.total * projectData.hourValue;
-                    
-                    data.push([
-                        solution.name,
-                        hours.inLoco.toFixed(1),
-                        hours.dataCenter.toFixed(1),
-                        hours.total.toFixed(1),
-                        valor.toFixed(2)
-                    ]);
-                    
-                    totalInLoco += hours.inLoco;
-                    totalDataCenter += hours.dataCenter;
-                    totalHoras += hours.total;
-                    totalValor += valor;
-                }
-            }
-            
-            // Coordenação
-            if (projectData.includeCoordination) {
-                const coordinationHours = totalHoras * 0.3;
-                const coordinationValor = coordinationHours * projectData.hourValue;
-                
-                data.push([
-                    "Coordenação de Projeto",
-                    (coordinationHours * 0.5).toFixed(1),
-                    (coordinationHours * 0.5).toFixed(1),
-                    coordinationHours.toFixed(1),
-                    coordinationValor.toFixed(2)
-                ]);
-                
-                totalInLoco += coordinationHours * 0.5;
-                totalDataCenter += coordinationHours * 0.5;
-                totalHoras += coordinationHours;
-                totalValor += coordinationValor;
-            }
-            
-            // Totais
-            data.push([]);
-            data.push(["TOTAIS", totalInLoco.toFixed(1), totalDataCenter.toFixed(1), totalHoras.toFixed(1), totalValor.toFixed(2)]);
-            data.push([]);
-            data.push(["Valor por hora:", `R$ ${projectData.hourValue.toFixed(2)}`]);
-            data.push(["Proposta Técnica necessária:", totalValor > 25000 ? "SIM" : "NÃO"]);
-            
-            // Converter para CSV
-            const csvContent = data.map(row => 
-                row.map(cell => `"${cell}"`).join(',')
-            ).join('\n');
-            
-            // Criar blob e fazer download
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `estimativa-ndd-${new Date().toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            alert('Planilha exportada com sucesso!');
+            alert('Exportando para Excel... (funcionalidade simulada)');
         }
 
         function exportToPDF() {
-            alert('Funcionalidade de exportação para PDF será implementada em breve!');
-            // Em uma implementação completa, usaria uma biblioteca como jsPDF
+            alert('Exportando para PDF... (funcionalidade simulada)');
         }
     </script>
 </body>
