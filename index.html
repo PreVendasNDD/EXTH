@@ -1,0 +1,1080 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Projetos Pequenos — Ajustes (Online)</title>
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --panel:#0f1624;
+      --panel2:#111b2d;
+      --text:#e8eefc;
+      --muted:#aab6d3;
+      --line:rgba(255,255,255,.08);
+      --ok:#2ee59d;
+      --warn:#ffcc66;
+      --bad:#ff5c7a;
+      --brand:#6aa7ff;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 800px at 20% 10%, rgba(106,167,255,.18), transparent 55%),
+                  radial-gradient(1000px 700px at 80% 0%, rgba(46,229,157,.12), transparent 55%),
+                  radial-gradient(900px 700px at 50% 90%, rgba(255,92,122,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+
+    .app{
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      min-height:100vh;
+      gap:16px;
+      padding:16px;
+    }
+
+    .sidebar{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      position:sticky;
+      top:16px;
+      height:calc(100vh - 32px);
+      overflow:auto;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      padding:10px 10px 12px;
+      border-bottom:1px solid var(--line);
+    }
+    .brand h1{
+      font-size:15px;
+      margin:0;
+      letter-spacing:.2px;
+      font-weight:700;
+    }
+    .brand p{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      padding:6px 0;
+    }
+    .nav button{
+      width:100%;
+      background:transparent;
+      border:1px solid transparent;
+      color:var(--text);
+      padding:10px 10px;
+      border-radius:12px;
+      text-align:left;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      transition:.15s ease;
+    }
+    .nav button:hover{
+      background:rgba(255,255,255,.03);
+      border-color:rgba(255,255,255,.06);
+    }
+    .nav button.active{
+      background:rgba(106,167,255,.10);
+      border-color:rgba(106,167,255,.25);
+    }
+    .pill{
+      font-size:11px;
+      color:var(--muted);
+      border:1px solid var(--line);
+      padding:2px 8px;
+      border-radius:999px;
+    }
+
+    .actions{
+      margin-top:auto;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      padding-top:10px;
+      border-top:1px solid var(--line);
+    }
+    .btn{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--text);
+      padding:10px 10px;
+      border-radius:12px;
+      cursor:pointer;
+      transition:.15s ease;
+      font-weight:600;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .btn:hover{ background:rgba(255,255,255,.06); }
+    .btn.primary{
+      background:rgba(46,229,157,.10);
+      border-color:rgba(46,229,157,.30);
+    }
+    .btn.danger{
+      background:rgba(255,92,122,.10);
+      border-color:rgba(255,92,122,.30);
+    }
+    .btn small{ color:var(--muted); font-weight:500; }
+
+    .main{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      min-width:0;
+    }
+
+    .header{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .header .title{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:240px;
+    }
+    .header h2{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+    .header .subtitle{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .kpis{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:stretch;
+      justify-content:flex-end;
+    }
+    .kpi{
+      min-width:180px;
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:14px;
+      padding:10px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .kpi .label{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.6px;
+    }
+    .kpi .value{
+      font-family:var(--mono);
+      font-size:16px;
+      font-weight:700;
+      letter-spacing:.3px;
+    }
+    .kpi .hint{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+      min-width:0;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:16px;
+    }
+    @media (max-width: 1100px){
+      .app{ grid-template-columns: 1fr; }
+      .sidebar{ position:relative; height:auto; }
+      .grid2{ grid-template-columns: 1fr; }
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:220px;
+      flex:1;
+    }
+    .field label{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .field input, .field select, .field textarea{
+      background:rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--text);
+      padding:10px 10px;
+      border-radius:12px;
+      outline:none;
+    }
+    .field textarea{ min-height:80px; resize:vertical; }
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      background:rgba(0,0,0,.18);
+    }
+    thead th{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.6px;
+      padding:10px 10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      text-align:left;
+      white-space:nowrap;
+    }
+    tbody td{
+      padding:10px 10px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      vertical-align:top;
+    }
+    tbody tr:last-child td{ border-bottom:none; }
+
+    .cell-input{
+      width:100%;
+      padding:8px 8px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      outline:none;
+      font-family:var(--mono);
+      font-size:12px;
+    }
+    .cell-input.small{ width:92px; }
+    .cell-input.tiny{ width:70px; }
+    .cell-input.select{
+      font-family:var(--sans);
+      font-size:12px;
+      padding:8px 8px;
+    }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:rgba(255,255,255,.20);
+    }
+    .dot.ok{ background:rgba(46,229,157,.9); }
+    .dot.warn{ background:rgba(255,204,102,.9); }
+    .dot.bad{ background:rgba(255,92,122,.9); }
+
+    .muted{ color:var(--muted); }
+    .mono{ font-family:var(--mono); }
+    .right{ text-align:right; }
+
+    .footer-note{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .toast{
+      position:fixed;
+      bottom:16px;
+      right:16px;
+      background:rgba(15,22,36,.92);
+      border:1px solid rgba(255,255,255,.10);
+      padding:10px 12px;
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      color:var(--text);
+      font-size:12px;
+      display:none;
+      max-width:min(520px, calc(100vw - 32px));
+      z-index:9999;
+    }
+    .toast.show{ display:block; }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .split{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>Projetos Pequenos (até 10 jobs)</h1>
+      <p>Protótipo online para horas, checklist e auditoria — rodando no GitHub Pages.</p>
+    </div>
+
+    <div class="nav" id="nav"></div>
+
+    <div class="actions">
+      <button class="btn primary" id="btnExportJson">
+        Exportar JSON <small>(backup)</small>
+      </button>
+      <label class="btn" style="cursor:pointer;">
+        Importar JSON <small>(restaurar)</small>
+        <input type="file" id="fileImportJson" accept="application/json" style="display:none;">
+      </label>
+      <button class="btn" id="btnExportCsv">Exportar CSV <small>(aba atual)</small></button>
+      <button class="btn danger" id="btnReset">Resetar tudo <small>(local)</small></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="header">
+      <div class="title">
+        <h2 id="pageTitle">CAPA</h2>
+        <p class="subtitle" id="pageSubtitle">Dashboard e dados do projeto</p>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="label">TOTAL LOCAL (horas)</div>
+          <div class="value" id="kpiLocal">0.00</div>
+          <div class="hint">soma de todos os módulos</div>
+        </div>
+        <div class="kpi">
+          <div class="label">TOTAL DC (horas)</div>
+          <div class="value" id="kpiDc">0.00</div>
+          <div class="hint">soma de todos os módulos</div>
+        </div>
+        <div class="kpi">
+          <div class="label">CONCLUÍDO</div>
+          <div class="value" id="kpiDone">0%</div>
+          <div class="hint">itens marcados como feitos</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="card" id="leftCard"></div>
+      <div class="card" id="rightCard"></div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </main>
+</div>
+
+<script>
+(() => {
+  // ====== CONFIG ======
+  const STORAGE_KEY = "pp_ajustes_online_v1";
+
+  const MODULES = [
+    { id:"CAPA", title:"CAPA", subtitle:"Dados do projeto + Dashboard" },
+    { id:"e-Forms", title:"e-Forms", subtitle:"Extrato detalhado + cálculo de horas" },
+    { id:"NFS-e Saída", title:"NFS-e Saída", subtitle:"Projeto NFS-e emissão + integração + jobs" },
+    { id:"NFC-e", title:"NFC-e", subtitle:"NFC-e emissão + integração + concentradores" },
+    { id:"NFS-e Entrada", title:"NFS-e Entrada", subtitle:"Entrada NFS-e + importações + jobs" },
+    { id:"Validadores NF-e e CT-e", title:"Validadores NF-e e CT-e", subtitle:"Validação e demandas" },
+    { id:"ECAD", title:"ECAD", subtitle:"Demandas e checklist ECAD" },
+    { id:"nddConnect", title:"nddConnect", subtitle:"Demandas e checklist nddConnect" },
+    { id:"Auditor e Agenda", title:"Auditor e Agenda", subtitle:"Auditoria final + agenda de pendências" },
+  ];
+
+  // Tarefas iniciais (seed) extraídas do seu .xlsm (estrutura simplificada para web)
+  // Você pode editar/expandir livremente online e depois exportar JSON.
+  const SEED = {
+    project: {
+      cliente: "",
+      projeto: "",
+      responsavel: "",
+      obs: ""
+    },
+    modules: {
+      "e-Forms": [
+        "Criação de JOB",
+        "Criação de JOB Entry NFe",
+        "Criação de JOB Entry CTe",
+        "Criação de JOB Entry NFSe",
+        "Criação de JOB Entry MDF-e",
+        "Criação de JOB Entry NFC-e",
+        "Criação de JOB Entry SAT",
+        "Criação de JOB Entry NFA-e",
+        "Criação de JOB Entry BP-e",
+        "Criação de JOB Entry NF3e",
+        "Criação de JOB Entry BPe",
+        "Criação de JOB Entry DF-e",
+        "Criação de JOB Entry NFCom",
+        "Criação de JOB Entry NFSe Nacional",
+        "Criação de JOB Entry GNRE"
+      ],
+      "NFS-e Saída": [
+        "Quantidades de Agentes",
+        "Quantidade de Prefeituras",
+        "Configuração JOB (Por Municipio)",
+        "Configuração em PDV (Por Agente)",
+        "Configurar para imprimir DANFSe",
+        "Regra Tributária + Natureza de Operação",
+        "Configuração de Retenção",
+        "Teste de Emissão",
+        "Reprocesso/Retentativas e retorno",
+        "Homologação/Validação Cliente",
+        "GoLive (Acompanhamento)",
+        "Ajustes Pós-GoLive",
+        "Documentação/Encerramento"
+      ],
+      "NFC-e": [
+        "Agentes em PDV",
+        "Estados de atuação",
+        "Quantidade de Lojas",
+        "Configuração de concentrador",
+        "Integração com ERP/Legado",
+        "Certificado / Série / CSC",
+        "Configurar impressão / DANFCE",
+        "Teste Autorização SEFAZ",
+        "Contingência (se aplicável)",
+        "Validação Cliente",
+        "GoLive (Acompanhamento)",
+        "Ajustes Pós-GoLive",
+        "Documentação/Encerramento"
+      ],
+      "NFS-e Entrada": [
+        "Criação de Job (Municipios com WS)",
+        "Criação de Job (Municipios sem WS)",
+        "Configuração de Importação",
+        "Configurar Captura/Busca",
+        "Validação de Layout (XML/Retornos)",
+        "Regras de Retenção (se aplicável)",
+        "Mapeamento de Serviços",
+        "Teste de Entrada",
+        "Reprocesso/Retentativas e retorno",
+        "Homologação/Validação Cliente",
+        "GoLive (Acompanhamento)",
+        "Ajustes Pós-GoLive",
+        "Documentação/Encerramento",
+        "Treinamento/Orientação"
+      ],
+      "Validadores NF-e e CT-e": [
+        "Demanda"
+      ],
+      "ECAD": [
+        "Demanda"
+      ],
+      "nddConnect": [
+        "Demanda"
+      ],
+      "Auditor e Agenda": [
+        "Demanda"
+      ]
+    }
+  };
+
+  function defaultTask(name){
+    return {
+      name,
+      tempoMin: 60,     // padrão 60 min (ajuste por item)
+      quantidade: 0,
+      localOuDc: "LOCAL", // LOCAL | DC
+      done: false,
+      note: ""
+    };
+  }
+
+  function buildInitialState(){
+    const modules = {};
+    for(const m of MODULES){
+      if(m.id === "CAPA") continue;
+      const seedList = SEED.modules[m.id] || [];
+      modules[m.id] = seedList.map(n => defaultTask(n));
+      // Ajustes de tempo inicial com base no padrão comum dos extratos (minutos)
+      // Você pode alterar na própria tabela item a item.
+      for(const t of modules[m.id]){
+        if(/JOB/i.test(t.name)) t.tempoMin = 15;
+        if(/Agentes/i.test(t.name)) t.tempoMin = 20;
+        if(/Prefeituras|Municipio/i.test(t.name)) t.tempoMin = 5;
+        if(/GoLive|Acompanhamento/i.test(t.name)) t.tempoMin = 120;
+        if(/Documentação|Encerramento/i.test(t.name)) t.tempoMin = 60;
+        if(/^Demanda$/i.test(t.name)) t.tempoMin = 60;
+      }
+    }
+    return {
+      version: 1,
+      activeModuleId: "CAPA",
+      project: { ...SEED.project },
+      modules
+    };
+  }
+
+  // ====== STATE ======
+  let state = loadState();
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return buildInitialState();
+      const parsed = JSON.parse(raw);
+      // migração simples
+      if(!parsed.modules || !parsed.project) return buildInitialState();
+      return parsed;
+    }catch{
+      return buildInitialState();
+    }
+  }
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updateHeaderKpis();
+  }
+
+  // ====== UI HELPERS ======
+  const $ = (sel) => document.querySelector(sel);
+  const navEl = $("#nav");
+  const leftCard = $("#leftCard");
+  const rightCard = $("#rightCard");
+  const pageTitle = $("#pageTitle");
+  const pageSubtitle = $("#pageSubtitle");
+  const toast = $("#toast");
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=> toast.classList.remove("show"), 2200);
+  }
+
+  function fmt(n){
+    const x = Number(n || 0);
+    return x.toFixed(2);
+  }
+
+  function computeTask(t){
+    const q = Number(t.quantidade || 0);
+    const tempo = Number(t.tempoMin || 0);
+    const minutos = tempo * q;
+    const horas = minutos / 60;
+    const dias = horas / 24;
+    return { minutos, horas, dias };
+  }
+
+  function computeTotals(){
+    let localHoras = 0;
+    let dcHoras = 0;
+
+    let doneCount = 0;
+    let totalCount = 0;
+
+    for(const modId of Object.keys(state.modules)){
+      const tasks = state.modules[modId] || [];
+      for(const t of tasks){
+        totalCount++;
+        if(t.done) doneCount++;
+        const c = computeTask(t);
+        if((t.localOuDc || "LOCAL") === "DC") dcHoras += c.horas;
+        else localHoras += c.horas;
+      }
+    }
+    const donePct = totalCount ? (doneCount/totalCount)*100 : 0;
+    return { localHoras, dcHoras, donePct, doneCount, totalCount };
+  }
+
+  // ====== NAV ======
+  function renderNav(){
+    navEl.innerHTML = "";
+    for(const m of MODULES){
+      const btn = document.createElement("button");
+      btn.className = state.activeModuleId === m.id ? "active" : "";
+      btn.innerHTML = `
+        <span>${m.title}</span>
+        <span class="pill">${badgeForModule(m.id)}</span>
+      `;
+      btn.addEventListener("click", () => {
+        state.activeModuleId = m.id;
+        saveState();
+        render();
+      });
+      navEl.appendChild(btn);
+    }
+  }
+
+  function badgeForModule(moduleId){
+    if(moduleId === "CAPA"){
+      const t = computeTotals();
+      return `${Math.round(t.donePct)}%`;
+    }
+    const tasks = state.modules[moduleId] || [];
+    if(tasks.length === 0) return "0";
+    const done = tasks.filter(x => !!x.done).length;
+    return `${done}/${tasks.length}`;
+  }
+
+  // ====== HEADER KPIs ======
+  function updateHeaderKpis(){
+    const totals = computeTotals();
+    $("#kpiLocal").textContent = fmt(totals.localHoras);
+    $("#kpiDc").textContent = fmt(totals.dcHoras);
+    $("#kpiDone").textContent = `${Math.round(totals.donePct)}%`;
+    renderNav(); // atualiza contadores ao salvar
+  }
+
+  // ====== PAGES ======
+  function render(){
+    const mod = MODULES.find(m => m.id === state.activeModuleId) || MODULES[0];
+    pageTitle.textContent = mod.title;
+    pageSubtitle.textContent = mod.subtitle;
+
+    if(state.activeModuleId === "CAPA"){
+      renderCapa();
+    }else{
+      renderModule(state.activeModuleId);
+    }
+
+    updateHeaderKpis();
+  }
+
+  function renderCapa(){
+    const totals = computeTotals();
+
+    leftCard.innerHTML = `
+      <div class="split">
+        <div>
+          <div class="badge"><span class="dot ok"></span> Dashboard</div>
+          <div style="height:8px"></div>
+          <div class="footer-note">
+            Este protótipo replica o controle de horas + checklist do arquivo <span class="mono">.xlsm</span> em um app web.
+            <br>Salva automaticamente no <span class="mono">localStorage</span>. Para backup, use <b>Exportar JSON</b>.
+          </div>
+        </div>
+        <div class="badge"><span class="dot"></span> Versão local: <span class="mono">v1</span></div>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <div class="row">
+        <div class="field">
+          <label>Cliente</label>
+          <input id="fCliente" placeholder="Ex: Empresa X" value="${escapeHtml(state.project.cliente)}" />
+        </div>
+        <div class="field">
+          <label>Projeto</label>
+          <input id="fProjeto" placeholder="Ex: Implantação NFS-e" value="${escapeHtml(state.project.projeto)}" />
+        </div>
+        <div class="field">
+          <label>Responsável</label>
+          <input id="fResp" placeholder="Ex: Fulano" value="${escapeHtml(state.project.responsavel)}" />
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="field" style="min-width:100%">
+        <label>Observações gerais</label>
+        <textarea id="fObs" placeholder="Notas do projeto, pendências gerais, decisões...">${escapeHtml(state.project.obs || "")}</textarea>
+      </div>
+    `;
+
+    rightCard.innerHTML = `
+      <div class="badge"><span class="dot warn"></span> Totais consolidados</div>
+      <div style="height:12px"></div>
+
+      <div class="kpi" style="min-width:100%">
+        <div class="label">Total geral (horas)</div>
+        <div class="value">${fmt(totals.localHoras + totals.dcHoras)}</div>
+        <div class="hint">LOCAL + DC</div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Módulo</th>
+            <th class="right">LOCAL (h)</th>
+            <th class="right">DC (h)</th>
+            <th class="right">Concluído</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${Object.keys(state.modules).map(modId => {
+            const tasks = state.modules[modId] || [];
+            let l=0, d=0, done=0;
+            for(const t of tasks){
+              const c = computeTask(t);
+              if((t.localOuDc || "LOCAL") === "DC") d += c.horas;
+              else l += c.horas;
+              if(t.done) done++;
+            }
+            const pct = tasks.length ? Math.round((done/tasks.length)*100) : 0;
+            return `
+              <tr>
+                <td><b>${escapeHtml(modId)}</b></td>
+                <td class="right mono">${fmt(l)}</td>
+                <td class="right mono">${fmt(d)}</td>
+                <td class="right mono">${pct}%</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+
+      <div style="height:12px"></div>
+      <div class="footer-note">
+        Dica: clique nos módulos à esquerda, ajuste <b>Tempo (min)</b> e <b>Quantidade</b>. O sistema calcula horas/dias automaticamente.
+      </div>
+    `;
+
+    // bind fields
+    $("#fCliente").addEventListener("input", (e)=>{ state.project.cliente = e.target.value; saveState(); });
+    $("#fProjeto").addEventListener("input", (e)=>{ state.project.projeto = e.target.value; saveState(); });
+    $("#fResp").addEventListener("input", (e)=>{ state.project.responsavel = e.target.value; saveState(); });
+    $("#fObs").addEventListener("input", (e)=>{ state.project.obs = e.target.value; saveState(); });
+  }
+
+  function renderModule(moduleId){
+    const tasks = state.modules[moduleId] || [];
+
+    leftCard.innerHTML = `
+      <div class="split">
+        <div class="row" style="margin:0">
+          <span class="badge"><span class="dot"></span> Módulo: <b>${escapeHtml(moduleId)}</b></span>
+          <span class="badge"><span class="dot ok"></span> Auto-save</span>
+        </div>
+        <div class="row" style="margin:0">
+          <button class="btn" id="btnAddRow" style="padding:8px 10px">+ Adicionar item</button>
+          <button class="btn" id="btnCloneTemplate" style="padding:8px 10px">Duplicar “Demanda”</button>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width:42px">OK</th>
+            <th>Item</th>
+            <th style="width:110px">LOCAL/DC</th>
+            <th style="width:110px">Tempo (min)</th>
+            <th style="width:110px">Qtd</th>
+            <th class="right" style="width:120px">Horas</th>
+            <th class="right" style="width:120px">Dias</th>
+            <th style="width:220px">Obs</th>
+            <th style="width:70px">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tasks.map((t, idx) => rowHtml(t, idx)).join("")}
+        </tbody>
+      </table>
+
+      <div style="height:10px"></div>
+      <div class="footer-note">
+        <b>Como usar:</b> ajuste a quantidade e o tempo. Marque “OK” quando concluir. Os totais aparecem no topo e na CAPA.
+      </div>
+    `;
+
+    const totals = moduleTotals(moduleId);
+    rightCard.innerHTML = `
+      <div class="badge"><span class="dot warn"></span> Resumo do módulo</div>
+      <div style="height:12px"></div>
+
+      <div class="kpi" style="min-width:100%">
+        <div class="label">LOCAL (horas)</div>
+        <div class="value">${fmt(totals.localHoras)}</div>
+        <div class="hint">somente itens LOCAL</div>
+      </div>
+      <div style="height:10px"></div>
+      <div class="kpi" style="min-width:100%">
+        <div class="label">DC (horas)</div>
+        <div class="value">${fmt(totals.dcHoras)}</div>
+        <div class="hint">somente itens DC</div>
+      </div>
+      <div style="height:10px"></div>
+      <div class="kpi" style="min-width:100%">
+        <div class="label">Concluído</div>
+        <div class="value">${Math.round(totals.donePct)}%</div>
+        <div class="hint">${totals.doneCount}/${totals.totalCount} itens</div>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="footer-note">
+        Se quiser que isso fique “multiusuário online” (cada pessoa vendo o mesmo status), o próximo passo é salvar/ler o JSON do GitHub via API.
+      </div>
+    `;
+
+    // bind actions
+    $("#btnAddRow").addEventListener("click", () => {
+      state.modules[moduleId].push(defaultTask("Novo item"));
+      saveState();
+      render();
+      showToast("Item adicionado.");
+    });
+
+    $("#btnCloneTemplate").addEventListener("click", () => {
+      state.modules[moduleId].push(defaultTask("Demanda"));
+      saveState();
+      render();
+      showToast("Demanda duplicada.");
+    });
+
+    // bind row inputs
+    tasks.forEach((t, idx) => {
+      const doneEl = document.getElementById(`done_${idx}`);
+      const nameEl = document.getElementById(`name_${idx}`);
+      const locEl  = document.getElementById(`loc_${idx}`);
+      const tempoEl= document.getElementById(`tempo_${idx}`);
+      const qtdEl  = document.getElementById(`qtd_${idx}`);
+      const noteEl = document.getElementById(`note_${idx}`);
+      const delEl  = document.getElementById(`del_${idx}`);
+
+      if(doneEl) doneEl.addEventListener("change", (e)=>{ t.done = e.target.checked; saveState(); render(); });
+      if(nameEl) nameEl.addEventListener("input", (e)=>{ t.name = e.target.value; saveState(); renderRowCalcs(moduleId, idx); });
+      if(locEl)  locEl.addEventListener("change",(e)=>{ t.localOuDc = e.target.value; saveState(); render(); });
+      if(tempoEl)tempoEl.addEventListener("input",(e)=>{ t.tempoMin = toNum(e.target.value); saveState(); renderRowCalcs(moduleId, idx); updateHeaderKpis(); });
+      if(qtdEl)  qtdEl.addEventListener("input",(e)=>{ t.quantidade = toNum(e.target.value); saveState(); renderRowCalcs(moduleId, idx); updateHeaderKpis(); });
+      if(noteEl) noteEl.addEventListener("input",(e)=>{ t.note = e.target.value; saveState(); });
+      if(delEl)  delEl.addEventListener("click", ()=>{
+        state.modules[moduleId].splice(idx,1);
+        saveState();
+        render();
+        showToast("Item removido.");
+      });
+    });
+  }
+
+  function rowHtml(t, idx){
+    const c = computeTask(t);
+    const done = !!t.done;
+    return `
+      <tr>
+        <td>
+          <input type="checkbox" id="done_${idx}" ${done ? "checked" : ""} />
+        </td>
+        <td>
+          <input class="cell-input" id="name_${idx}" value="${escapeAttr(t.name)}" />
+          <div class="status" style="margin-top:6px">
+            <span class="dot ${done ? "ok" : "warn"}"></span>
+            <span>${done ? "Concluído" : "Pendente"}</span>
+          </div>
+        </td>
+        <td>
+          <select class="cell-input select" id="loc_${idx}">
+            <option value="LOCAL" ${t.localOuDc==="LOCAL"?"selected":""}>LOCAL</option>
+            <option value="DC" ${t.localOuDc==="DC"?"selected":""}>DC</option>
+          </select>
+        </td>
+        <td><input class="cell-input small right" id="tempo_${idx}" value="${escapeAttr(t.tempoMin)}" /></td>
+        <td><input class="cell-input small right" id="qtd_${idx}" value="${escapeAttr(t.quantidade)}" /></td>
+        <td class="right mono" id="horas_${idx}">${fmt(c.horas)}</td>
+        <td class="right mono" id="dias_${idx}">${fmt(c.dias)}</td>
+        <td><input class="cell-input" id="note_${idx}" value="${escapeAttr(t.note || "")}" placeholder="observações..." /></td>
+        <td><button class="btn danger" id="del_${idx}" style="padding:8px 10px">X</button></td>
+      </tr>
+    `;
+  }
+
+  function renderRowCalcs(moduleId, idx){
+    const t = state.modules[moduleId][idx];
+    if(!t) return;
+    const c = computeTask(t);
+    const h = document.getElementById(`horas_${idx}`);
+    const d = document.getElementById(`dias_${idx}`);
+    if(h) h.textContent = fmt(c.horas);
+    if(d) d.textContent = fmt(c.dias);
+  }
+
+  function moduleTotals(moduleId){
+    const tasks = state.modules[moduleId] || [];
+    let localHoras=0, dcHoras=0, doneCount=0;
+    for(const t of tasks){
+      const c = computeTask(t);
+      if((t.localOuDc||"LOCAL")==="DC") dcHoras += c.horas;
+      else localHoras += c.horas;
+      if(t.done) doneCount++;
+    }
+    const totalCount = tasks.length;
+    const donePct = totalCount ? (doneCount/totalCount)*100 : 0;
+    return { localHoras, dcHoras, donePct, doneCount, totalCount };
+  }
+
+  // ====== EXPORT/IMPORT ======
+  function download(filename, content, mime){
+    const blob = new Blob([content], {type: mime || "text/plain"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportJson(){
+    const ts = new Date().toISOString().replace(/[:.]/g,"-");
+    download(`projetos_pequenos_backup_${ts}.json`, JSON.stringify(state,null,2), "application/json");
+    showToast("JSON exportado.");
+  }
+
+  function importJsonFile(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(reader.result);
+        if(!parsed.modules || !parsed.project){
+          showToast("JSON inválido (sem estrutura esperada).");
+          return;
+        }
+        state = parsed;
+        saveState();
+        render();
+        showToast("JSON importado com sucesso.");
+      }catch{
+        showToast("Falha ao importar JSON.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function exportCsvCurrent(){
+    const id = state.activeModuleId;
+    if(id === "CAPA"){
+      // exporta resumo por módulo
+      let csv = "Modulo,LocalHoras,DcHoras,ConcluidoPct\n";
+      for(const modId of Object.keys(state.modules)){
+        const t = moduleTotals(modId);
+        csv += `"${modId.replace(/"/g,'""')}",${fmt(t.localHoras)},${fmt(t.dcHoras)},${Math.round(t.donePct)}\n`;
+      }
+      download("CAPA_resumo.csv", csv, "text/csv");
+      showToast("CSV da CAPA exportado.");
+      return;
+    }
+
+    const tasks = state.modules[id] || [];
+    let csv = "OK,Item,LOCAL_DC,TempoMin,Quantidade,Minutos,Horas,Dias,Obs\n";
+    for(const t of tasks){
+      const c = computeTask(t);
+      csv += [
+        t.done ? "1":"0",
+        `"${String(t.name||"").replace(/"/g,'""')}"`,
+        t.localOuDc || "LOCAL",
+        Number(t.tempoMin||0),
+        Number(t.quantidade||0),
+        Number(c.minutos||0),
+        fmt(c.horas),
+        fmt(c.dias),
+        `"${String(t.note||"").replace(/"/g,'""')}"`
+      ].join(",") + "\n";
+    }
+    download(`${id.replace(/[^\w\-]+/g,"_")}.csv`, csv, "text/csv");
+    showToast("CSV exportado.");
+  }
+
+  function resetAll(){
+    state = buildInitialState();
+    saveState();
+    render();
+    showToast("Reset completo feito.");
+  }
+
+  // ====== UTILS ======
+  function toNum(v){
+    if(v === "" || v === null || v === undefined) return 0;
+    const x = String(v).replace(",", ".").replace(/[^\d.\-]/g,"");
+    const n = Number(x);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+  function escapeAttr(s){ return escapeHtml(s).replaceAll("\n"," "); }
+
+  // ====== GLOBAL BUTTONS ======
+  $("#btnExportJson").addEventListener("click", exportJson);
+  $("#fileImportJson").addEventListener("change", (e)=>{
+    const f = e.target.files?.[0];
+    if(f) importJsonFile(f);
+    e.target.value = "";
+  });
+  $("#btnExportCsv").addEventListener("click", exportCsvCurrent);
+  $("#btnReset").addEventListener("click", () => {
+    if(confirm("Tem certeza que quer resetar tudo (apaga o localStorage deste app)?")){
+      localStorage.removeItem(STORAGE_KEY);
+      resetAll();
+    }
+  });
+
+  // ====== INIT ======
+  renderNav();
+  render();
+  updateHeaderKpis();
+  showToast("Pronto. Ajuste os módulos e salve com Exportar JSON.");
+})();
+</script>
+</body>
+</html>
